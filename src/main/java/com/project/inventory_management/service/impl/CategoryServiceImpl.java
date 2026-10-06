@@ -2,6 +2,7 @@ package com.project.inventory_management.service.impl;
 
 import com.project.inventory_management.dto.CategoryRequest;
 import com.project.inventory_management.entity.Category;
+import com.project.inventory_management.exception.DuplicateResourceException;
 import com.project.inventory_management.repository.CategoryRepository;
 import com.project.inventory_management.service.CategoryService;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class CategoryServiceImpl implements CategoryService {
     public Category createCategory(CategoryRequest request) {
 
         if (categoryRepository.existsByName(request.getName())) {
-            throw new RuntimeException("Category already exists");
+            throw new DuplicateResourceException("Category already exists");
         }
 
         Category category = Category.builder()

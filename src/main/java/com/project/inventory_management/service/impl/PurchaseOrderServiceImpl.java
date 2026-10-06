@@ -5,6 +5,8 @@ import com.project.inventory_management.dto.PurchaseOrderItemResponse;
 import com.project.inventory_management.dto.PurchaseOrderRequest;
 import com.project.inventory_management.dto.PurchaseOrderResponse;
 import com.project.inventory_management.entity.*;
+import com.project.inventory_management.exception.BadRequestException;
+import com.project.inventory_management.exception.ResourceNotFoundException;
 import com.project.inventory_management.repository.InventoryTransactionRepository;
 import com.project.inventory_management.repository.ProductRepository;
 import com.project.inventory_management.repository.PurchaseOrderRepository;
@@ -36,10 +38,10 @@ public class PurchaseOrderServiceImpl
         Supplier supplier = supplierRepository.findById(
                 request.getSupplierId()
         ).orElseThrow(() ->
-                new RuntimeException("Supplier not found"));
+                new ResourceNotFoundException("Supplier not found"));
 
         if (supplier.getStatus() == SupplierStatus.INACTIVE) {
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Cannot create PO for inactive supplier");
         }
 
@@ -57,12 +59,12 @@ public class PurchaseOrderServiceImpl
             Product product = productRepository.findById(
                     itemRequest.getProductId()
             ).orElseThrow(() ->
-                    new RuntimeException(
+                    new ResourceNotFoundException(
                             "Product not found: "
                                     + itemRequest.getProductId()));
 
             if (product.getStatus() == ProductStatus.INACTIVE) {
-                throw new RuntimeException(
+                throw new BadRequestException(
                         "Product is inactive: "
                                 + product.getSku());
             }
@@ -101,7 +103,7 @@ public class PurchaseOrderServiceImpl
         PurchaseOrder order =
                 purchaseOrderRepository.findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "Purchase order not found"));
 
         return mapToResponse(order);
@@ -124,11 +126,11 @@ public class PurchaseOrderServiceImpl
         PurchaseOrder order =
                 purchaseOrderRepository.findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "Purchase order not found"));
 
         if (order.getStatus() != PurchaseOrderStatus.DRAFT) {
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Only DRAFT purchase orders can be approved");
         }
 
@@ -143,11 +145,11 @@ public class PurchaseOrderServiceImpl
         PurchaseOrder order =
                 purchaseOrderRepository.findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "Purchase order not found"));
 
         if (order.getStatus() != PurchaseOrderStatus.APPROVED) {
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Only APPROVED purchase orders can be received");
         }
 
@@ -185,16 +187,16 @@ public class PurchaseOrderServiceImpl
         PurchaseOrder order =
                 purchaseOrderRepository.findById(id)
                         .orElseThrow(() ->
-                                new RuntimeException(
+                                new ResourceNotFoundException(
                                         "Purchase order not found"));
 
         if (order.getStatus() == PurchaseOrderStatus.RECEIVED) {
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Received purchase order cannot be cancelled");
         }
 
         if (order.getStatus() == PurchaseOrderStatus.CANCELLED) {
-            throw new RuntimeException(
+            throw new BadRequestException(
                     "Purchase order is already cancelled");
         }
 

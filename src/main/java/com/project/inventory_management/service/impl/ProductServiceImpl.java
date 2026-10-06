@@ -4,6 +4,8 @@ import com.project.inventory_management.dto.ProductRequest;
 import com.project.inventory_management.dto.ProductResponse;
 import com.project.inventory_management.entity.Category;
 import com.project.inventory_management.entity.Product;
+import com.project.inventory_management.exception.DuplicateResourceException;
+import com.project.inventory_management.exception.ResourceNotFoundException;
 import com.project.inventory_management.repository.CategoryRepository;
 import com.project.inventory_management.repository.ProductRepository;
 import com.project.inventory_management.service.ProductService;
@@ -25,12 +27,12 @@ public class ProductServiceImpl implements ProductService {
     public ProductResponse createProduct(ProductRequest request) {
 
         if (productRepository.existsBySku(request.getSku())) {
-            throw new RuntimeException("Product with SKU already exists");
+            throw new DuplicateResourceException("Product with SKU already exists");
         }
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() ->
-                        new RuntimeException("Category not found"));
+                        new ResourceNotFoundException("Category not found"));
 
         Product product = Product.builder()
                 .sku(request.getSku())
@@ -53,7 +55,7 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Product not found"));
+                        new ResourceNotFoundException("Product not found"));
 
         return mapToResponse(product);
     }
@@ -73,11 +75,11 @@ public class ProductServiceImpl implements ProductService {
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Product not found"));
+                        new ResourceNotFoundException("Product not found"));
 
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() ->
-                        new RuntimeException("Category not found"));
+                        new ResourceNotFoundException("Category not found"));
 
         product.setName(request.getName());
         product.setDescription(request.getDescription());
@@ -92,7 +94,7 @@ public class ProductServiceImpl implements ProductService {
     public void deleteProduct(Long id) {
 
         if (!productRepository.existsById(id)) {
-            throw new RuntimeException("Product not found");
+            throw new ResourceNotFoundException("Product not found");
         }
 
         productRepository.deleteById(id);

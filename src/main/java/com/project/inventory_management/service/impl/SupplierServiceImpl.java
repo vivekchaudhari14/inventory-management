@@ -3,6 +3,8 @@ package com.project.inventory_management.service.impl;
 import com.project.inventory_management.dto.SupplierRequest;
 import com.project.inventory_management.dto.SupplierResponse;
 import com.project.inventory_management.entity.Supplier;
+import com.project.inventory_management.exception.DuplicateResourceException;
+import com.project.inventory_management.exception.ResourceNotFoundException;
 import com.project.inventory_management.repository.SupplierRepository;
 import com.project.inventory_management.service.SupplierService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +24,7 @@ public class SupplierServiceImpl implements SupplierService {
     public SupplierResponse createSupplier(SupplierRequest request) {
 
         if (supplierRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Supplier with this email already exists");
+            throw new DuplicateResourceException("Supplier with this email already exists");
         }
 
         Supplier supplier = Supplier.builder()
@@ -40,7 +42,7 @@ public class SupplierServiceImpl implements SupplierService {
     public SupplierResponse getSupplier(Long id) {
 
         Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found"));
 
         return mapToResponse(supplier);
     }
@@ -61,7 +63,7 @@ public class SupplierServiceImpl implements SupplierService {
             SupplierRequest request) {
 
         Supplier supplier = supplierRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Supplier not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Supplier not found"));
 
         supplier.setName(request.getName());
         supplier.setPhone(request.getPhone());
@@ -74,7 +76,7 @@ public class SupplierServiceImpl implements SupplierService {
     public void deleteSupplier(Long id) {
 
         if (!supplierRepository.existsById(id)) {
-            throw new RuntimeException("Supplier not found");
+            throw new ResourceNotFoundException("Supplier not found");
         }
 
         supplierRepository.deleteById(id);
