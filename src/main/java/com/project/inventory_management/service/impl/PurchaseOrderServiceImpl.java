@@ -5,6 +5,7 @@ import com.project.inventory_management.dto.PurchaseOrderItemResponse;
 import com.project.inventory_management.dto.PurchaseOrderRequest;
 import com.project.inventory_management.dto.PurchaseOrderResponse;
 import com.project.inventory_management.entity.*;
+import com.project.inventory_management.repository.InventoryTransactionRepository;
 import com.project.inventory_management.repository.ProductRepository;
 import com.project.inventory_management.repository.PurchaseOrderRepository;
 import com.project.inventory_management.repository.SupplierRepository;
@@ -26,6 +27,7 @@ public class PurchaseOrderServiceImpl
     private final PurchaseOrderRepository purchaseOrderRepository;
     private final SupplierRepository supplierRepository;
     private final ProductRepository productRepository;
+    private final InventoryTransactionRepository inventoryTransactionRepository;
 
     @Override
     public PurchaseOrderResponse createPurchaseOrder(
@@ -149,10 +151,28 @@ public class PurchaseOrderServiceImpl
                     "Only APPROVED purchase orders can be received");
         }
 
-        /*
-         * Inventory update will be implemented in the
-         * InventoryTransaction module.
-         */
+        for (PurchaseOrderItem item : order.getItems()) {
+
+            Product product = item.getProduct();
+
+            int oldStock = product.getCurrentStock();
+
+            int newStock = oldStock + item.getQuantity();
+
+            product.setCurrentStock(newStock);
+
+            InventoryTransaction transaction =
+                    InventoryTransaction.builder()
+                            .product(product)
+                            .transactionType(
+                                    InventoryTransactionType.PURCHASE_RECEIVED)
+                            .quantity(item.getQuantity())
+                            .referenceType("PURCHASE_ORDER")
+                            .referenceId(order.getId())
+                            .build();
+
+            inventoryTransactionRepository.save(transaction);
+        }
 
         order.setStatus(PurchaseOrderStatus.RECEIVED);
 

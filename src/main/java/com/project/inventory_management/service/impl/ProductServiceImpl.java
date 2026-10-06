@@ -98,6 +98,16 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(id);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<ProductResponse> getLowStockProducts() {
+
+        return productRepository.findLowStockProducts()
+                .stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+
     private ProductResponse mapToResponse(Product product) {
 
         return ProductResponse.builder()
