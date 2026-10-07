@@ -14,11 +14,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     boolean existsBySku(String sku);
 
     @Query("""
-        SELECT p
-        FROM Product p
-        WHERE p.currentStock <= p.reorderLevel
-        AND p.status = com.vivek.inventory.entity.ProductStatus.ACTIVE
-        """)
+            SELECT p
+            FROM Product p
+            WHERE p.currentStock <= p.reorderLevel
+            AND p.status = com.vivek.inventory.entity.ProductStatus.ACTIVE
+            """)
     List<Product> findLowStockProducts();
 
 }
